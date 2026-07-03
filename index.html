@@ -1,134 +1,310 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>智慧预约平台 · 用户车辆信息</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, "Microsoft YaHei", sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 24px;
-      color: #333;
-    }
-    h1 { color: #fff; text-align: center; margin-bottom: 8px; font-weight: 600; }
-    .subtitle { color: rgba(255,255,255,.85); text-align: center; margin-bottom: 24px; font-size: 14px; }
-    .toolbar {
-      background: #fff; border-radius: 12px; padding: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,.1); margin-bottom: 20px;
-      display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
-    }
-    .toolbar input {
-      flex: 1; min-width: 200px; padding: 10px 14px; border: 1px solid #ddd;
-      border-radius: 8px; font-size: 14px; outline: none;
-    }
-    .toolbar input:focus { border-color: #667eea; }
-    .toolbar button {
-      padding: 10px 20px; background: #667eea; color: #fff; border: none;
-      border-radius: 8px; cursor: pointer; font-size: 14px; transition: background .2s;
-    }
-    .toolbar button:hover { background: #5568d3; }
-    .toolbar button.reset { background: #999; }
-    .toolbar button.reset:hover { background: #777; }
-    #status { font-size: 13px; color: #888; }
-    .card {
-      background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,.1);
-    }
-    .user-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-    .user-name { font-size: 20px; font-weight: 600; }
-    .user-meta { color: #888; font-size: 13px; margin-top: 4px; }
-    .badge {
-      display: inline-block; padding: 3px 10px; border-radius: 12px;
-      font-size: 12px; font-weight: 500;
-    }
-    .badge.gold { background: #fff3cd; color: #856404; }
-    .badge.silver { background: #e2e3e5; color: #6c757d; }
-    .badge.normal { background: #d1ecf1; color: #0c5460; }
-    .vehicle {
-      background: #f8f9ff; border-left: 3px solid #667eea; padding: 12px 14px;
-      border-radius: 6px; margin-top: 10px;
-    }
-    .vehicle-plate { font-weight: 600; color: #2c3e50; font-size: 15px; }
-    .vehicle-info { color: #666; font-size: 13px; margin-top: 6px; line-height: 1.7; }
-    .vehicle-info span { margin-right: 14px; }
-    .empty { text-align: center; color: #fff; padding: 40px; font-size: 16px; }
-    code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>用户车辆履历档案</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 30px 15px;
+    color: #333;
+  }
+  .container { max-width: 900px; margin: 0 auto; }
+
+  .header {
+    text-align: center;
+    color: #fff;
+    margin-bottom: 30px;
+  }
+  .header h1 { font-size: 32px; margin-bottom: 8px; letter-spacing: 2px; }
+  .header p { font-size: 14px; opacity: 0.85; }
+
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  }
+  .card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-title .icon { font-size: 22px; }
+
+  .user-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .info-item { display: flex; flex-direction: column; gap: 4px; }
+  .info-item .label { font-size: 12px; color: #999; }
+  .info-item .value { font-size: 16px; color: #2c3e50; font-weight: 500; }
+  .info-item .value.highlight { color: #e67e22; }
+
+  .car-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .car-plate {
+    background: #2c3e50;
+    color: #fff;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    font-family: "Courier New", monospace;
+  }
+  .car-name { font-size: 20px; font-weight: 600; color: #2c3e50; }
+
+  .timeline { position: relative; padding-left: 30px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: linear-gradient(to bottom, #667eea, #764ba2);
+  }
+  .event {
+    position: relative;
+    margin-bottom: 24px;
+    padding: 18px 20px;
+    background: #f8f9fc;
+    border-radius: 10px;
+    border-left: 4px solid #667eea;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .event:hover {
+    transform: translateX(4px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  }
+  .event::before {
+    content: '';
+    position: absolute;
+    left: -26px;
+    top: 22px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid #667eea;
+  }
+  .event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .event-title { font-size: 16px; font-weight: 600; color: #2c3e50; }
+  .event-date { font-size: 13px; color: #888; }
+  .event-type {
+    display: inline-block;
+    font-size: 12px;
+    padding: 2px 10px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .type-tire { background: #fff3cd; color: #856404; }
+  .type-maintenance { background: #d1ecf1; color: #0c5460; }
+  .type-fault { background: #f8d7da; color: #721c24; }
+  .type-accident { background: #e2d9f3; color: #5a3d8a; }
+  .event-desc { font-size: 14px; color: #555; line-height: 1.7; margin-bottom: 10px; }
+  .event-meta {
+    display: flex;
+    gap: 18px;
+    font-size: 13px;
+    color: #888;
+    flex-wrap: wrap;
+  }
+  .event-meta span { display: flex; align-items: center; gap: 4px; }
+  .event-meta .cost { color: #e67e22; font-weight: 600; }
+  .status-done {
+    font-size: 12px;
+    padding: 2px 10px;
+    border-radius: 10px;
+    background: #d4edda;
+    color: #155724;
+    font-weight: 600;
+  }
+
+  .footer {
+    text-align: center;
+    color: rgba(255,255,255,0.7);
+    font-size: 13px;
+    margin-top: 20px;
+  }
+  .api-link {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 20px;
+    font-size: 13px;
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+  .api-link:hover { background: rgba(255,255,255,0.25); }
+</style>
 </head>
 <body>
-  <h1>🚗 智慧预约平台</h1>
-  <p class="subtitle">用户 / 车辆信息查询系统 · 数据接口：<code>/api/users</code></p>
+<div class="container">
 
-  <div class="toolbar">
-    <input id="q" placeholder="输入用户ID（如 U001）/ 手机号 / 姓名 查询">
-    <button onclick="search()">查询</button>
-    <button class="reset" onclick="loadAll()">显示全部</button>
-    <span id="status"></span>
+  <div class="header">
+    <h1>🔧 智慧预约平台 · 履历档案</h1>
+    <p>用户与车辆历史维修保养记录</p>
   </div>
 
-  <div id="list"></div>
+  <div class="card">
+    <div class="card-title"><span class="icon">👤</span> 用户信息</div>
+    <div class="user-grid">
+      <div class="info-item"><span class="label">用户ID</span><span class="value">U001</span></div>
+      <div class="info-item"><span class="label">姓名</span><span class="value">张三</span></div>
+      <div class="info-item"><span class="label">手机号</span><span class="value">138****0001</span></div>
+      <div class="info-item"><span class="label">会员等级</span><span class="value highlight">金卡会员</span></div>
+      <div class="info-item"><span class="label">注册日期</span><span class="value">2022-03-15</span></div>
+    </div>
+  </div>
 
-  <script>
-    const badgeClass = lv => ({'金卡会员':'gold','银卡会员':'silver','普通会员':'normal'}[lv] || 'normal');
+  <div class="card">
+    <div class="card-title"><span class="icon">🚗</span> 车辆信息</div>
+    <div class="car-header">
+      <div class="car-plate">京A·12345</div>
+      <div class="car-name">宝马 X3 · 2022款</div>
+    </div>
+    <div class="user-grid">
+      <div class="info-item"><span class="label">品牌型号</span><span class="value">宝马 X3</span></div>
+      <div class="info-item"><span class="label">年款</span><span class="value">2022</span></div>
+      <div class="info-item"><span class="label">颜色</span><span class="value">矿石白</span></div>
+      <div class="info-item"><span class="label">当前里程</span><span class="value">28,000 km</span></div>
+      <div class="info-item"><span class="label">车架号(VIN)</span><span class="value" style="font-size:13px;">LBVXXSAR0NMA12345</span></div>
+      <div class="info-item"><span class="label">保险到期</span><span class="value">2027-03-14</span></div>
+      <div class="info-item"><span class="label">上次到店</span><span class="value">2026-06-28</span></div>
+    </div>
+  </div>
 
-    function render(data) {
-      const list = document.getElementById('list');
-      if (!data || data.length === 0) {
-        list.innerHTML = '<div class="empty">未找到匹配的用户</div>';
-        return;
-      }
-      list.innerHTML = data.map(u => `
-        <div class="card">
-          <div class="user-header">
-            <div>
-              <div class="user-name">${u.name}</div>
-              <div class="user-meta">ID: ${u.userId} · 📞 ${u.phone}</div>
-            </div>
-            <span class="badge ${badgeClass(u.memberLevel)}">${u.memberLevel}</span>
+  <div class="card">
+    <div class="card-title"><span class="icon">📋</span> 维修保养履历</div>
+    <div class="timeline">
+
+      <div class="event">
+        <div class="event-header">
+          <div>
+            <span class="event-type type-tire">轮胎维修</span>
+            <div class="event-title">右前轮胎被钉扎破</div>
           </div>
-          ${u.vehicles.map(v => `
-            <div class="vehicle">
-              <div class="vehicle-plate">🚙 ${v.plate} · ${v.brand} ${v.model}</div>
-              <div class="vehicle-info">
-                <span>年份: ${v.year}</span>
-                <span>里程: ${v.mileage} km</span>
-                <span>上次保养: ${v.lastService}</span>
-              </div>
-            </div>
-          `).join('')}
+          <div class="event-date">2026-06-28 · 28,000 km</div>
         </div>
-      `).join('');
-    }
+        <div class="event-desc">用户反馈行驶中右前轮胎漏气，到店检查发现被钉子扎破，进行补胎修复，复测胎压正常。</div>
+        <div class="event-meta">
+          <span>💰 <span class="cost">¥80</span></span>
+          <span class="status-done">已完成</span>
+        </div>
+      </div>
 
-    async function loadAll() {
-      document.getElementById('q').value = '';
-      document.getElementById('status').textContent = '加载中...';
-      const r = await fetch('/api/users');
-      const j = await r.json();
-      render(j.data);
-      document.getElementById('status').textContent = `共 ${j.count} 位用户`;
-    }
+      <div class="event">
+        <div class="event-header">
+          <div>
+            <span class="event-type type-maintenance">常规保养</span>
+            <div class="event-title">2.8万公里常规保养 + 更换刹车片</div>
+          </div>
+          <div class="event-date">2026-06-05 · 27,500 km</div>
+        </div>
+        <div class="event-desc">常规小保养：更换机油（0W-20 全合成 5L）、机油滤芯；检查发现前刹车片磨损至临界，一并更换前刹车片。</div>
+        <div class="event-meta">
+          <span>💰 <span class="cost">¥1,280</span></span>
+          <span class="status-done">已完成</span>
+        </div>
+      </div>
 
-    async function search() {
-      const q = document.getElementById('q').value.trim();
-      if (!q) return loadAll();
-      document.getElementById('status').textContent = '查询中...';
-      // 自动判断：U 开头按 userId，纯数字按 phone，否则按 name
-      let url = '/api/users?';
-      if (/^u\d+$/i.test(q)) url += 'userId=' + q;
-      else if (/^\d+$/.test(q)) url += 'phone=' + q;
-      else url += 'name=' + encodeURIComponent(q);
-      const r = await fetch(url);
-      const j = await r.json();
-      render(j.data);
-      document.getElementById('status').textContent = `找到 ${j.count} 位用户`;
-    }
+      <div class="event">
+        <div class="event-header">
+          <div>
+            <span class="event-type type-fault">故障维修</span>
+            <div class="event-title">刹车系统异响</div>
+          </div>
+          <div class="event-date">2026-02-15 · 25,000 km</div>
+        </div>
+        <div class="event-desc">用户反馈低速刹车时左前轮有金属摩擦异响，检查为刹车盘磨损不均，更换左前刹车盘并打磨刹车片。</div>
+        <div class="event-meta">
+          <span>💰 <span class="cost">¥1,850</span></span>
+          <span class="status-done">已完成</span>
+        </div>
+      </div>
 
-    document.getElementById('q').addEventListener('keydown', e => { if(e.key==='Enter') search(); });
-    loadAll();
-  </script>
+      <div class="event">
+        <div class="event-header">
+          <div>
+            <span class="event-type type-accident">事故维修</span>
+            <div class="event-title">左侧车门剐蹭喷漆</div>
+          </div>
+          <div class="event-date">2025-11-10 · 22,000 km</div>
+        </div>
+        <div class="event-desc">倒车时剐蹭左侧前车门，钣金修复并喷漆，左前门外观恢复原状。</div>
+        <div class="event-meta">
+          <span>💰 <span class="cost">¥2,500</span></span>
+          <span class="status-done">已完成</span>
+        </div>
+      </div>
+
+      <div class="event">
+        <div class="event-header">
+          <div>
+            <span class="event-type type-maintenance">常规保养</span>
+            <div class="event-title">2万公里常规保养</div>
+          </div>
+          <div class="event-date">2025-08-20 · 20,000 km</div>
+        </div>
+        <div class="event-desc">更换机油、机油滤芯、空气滤芯、空调滤芯；全车油水检查正常。</div>
+        <div class="event-meta">
+          <span>💰 <span class="cost">¥980</span></span>
+          <span class="status-done">已完成</span>
+        </div>
+      </div>
+
+      <div class="event">
+        <div class="event-header">
+          <div>
+            <span class="event-type type-fault">故障维修</span>
+            <div class="event-title">空调不制冷</div>
+          </div>
+          <div class="event-date">2025-03-05 · 16,000 km</div>
+        </div>
+        <div class="event-desc">用户反馈空调制冷效果差，检查为冷媒不足，补充冷媒并修复管路微小渗漏点。</div>
+        <div class="event-meta">
+          <span>💰 <span class="cost">¥420</span></span>
+          <span class="status-done">已完成</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>智慧预约平台 · 数据接口演示页</p>
+    <a class="api-link" href="/api/users?userId=U001" target="_blank">查看 JSON 数据接口 →</a>
+  </div>
+
+</div>
 </body>
 </html>
